@@ -1,5 +1,5 @@
-import { DocumentAiApp } from "@/components/document-ai/document-ai-app";
+import { Home as HomeView } from "@/components/home";
 
 export default function Home() {
-  return <DocumentAiApp />;
+  return <HomeView />;
 }

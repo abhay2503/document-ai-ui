@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
+import { AuthButton } from "./auth-button";
 
 export function SiteHeader() {
   return (
@@ -17,13 +18,16 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-medium text-accent-foreground">
-          <span className="relative flex size-1.5" aria-hidden>
-            <span className="absolute inline-flex size-full rounded-full bg-primary/60 motion-safe:animate-ping" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-medium text-accent-foreground">
+            <span className="relative flex size-1.5" aria-hidden>
+              <span className="absolute inline-flex size-full rounded-full bg-primary/60 motion-safe:animate-ping" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
+            </span>
+            AI-powered
           </span>
-          AI-powered
-        </span>
+          <AuthButton />
+        </div>
       </div>
     </header>
   );

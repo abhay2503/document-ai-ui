@@ -36,3 +36,17 @@ export interface SummaryJob {
   result?: SummaryResult;
   error?: string;
 }
+
+/** Daily summary quota returned by POST /summaries (UTC day). */
+export interface DailyQuota {
+  dailyLimit: number;
+  dailyUsed: number;
+  dailyRemaining: number;
+}
+
+/** Response of POST /summaries */
+export interface CreateSummaryResponse extends DailyQuota {
+  jobId: string;
+  documentId: string;
+  status: JobStatus;
+}

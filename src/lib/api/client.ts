@@ -1,11 +1,26 @@
 import axios from "axios";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { getFileType } from "@/lib/file-validation";
-import type { SummaryJob, SummaryStyle } from "./types";
+import type { CreateSummaryResponse, SummaryJob, SummaryStyle } from "./types";
 
 // Our backend (API Gateway). Set NEXT_PUBLIC_API_BASE_URL in .env.local
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   timeout: 30_000,
+});
+
+// Attach the Cognito access token to API Gateway calls when signed in.
+// Amplify refreshes it as needed. The S3 presigned upload below uses plain
+// axios on purpose — it must NOT carry an Authorization header.
+api.interceptors.request.use(async (config) => {
+  try {
+    const session = await fetchAuthSession();
+    const accessToken = session.tokens?.accessToken?.toString();
+    if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+  } catch {
+    // Not signed in — send the request without a token.
+  }
+  return config;
 });
 
 /**
@@ -39,10 +54,21 @@ export async function uploadDocument(file: File, onProgress: (percent: number) =
   return data.documentId;
 }
 
-/** POST /summaries → starts processing and returns a jobId */
-export async function createSummary(documentId: string, style: SummaryStyle): Promise<string> {
-  const { data } = await api.post<{ jobId: string }>("/summaries", { documentId, style });
-  return data.jobId;
+/** POST /summaries → starts processing; returns the jobId and today's quota */
+export async function createSummary(documentId: string, style: SummaryStyle): Promise<CreateSummaryResponse> {
+  const { data } = await api.post<CreateSummaryResponse>("/summaries", { documentId, style });
+  return data;
+}
+
+export const DAILY_LIMIT_CODE = "DAILY_SUMMARY_LIMIT_REACHED";
+
+/** True when POST /summaries was refused because the daily limit is used up. */
+export function isDailyLimitError(error: unknown): boolean {
+  return (
+    axios.isAxiosError(error) &&
+    error.response?.status === 429 &&
+    (error.response.data as { code?: string } | undefined)?.code === DAILY_LIMIT_CODE
+  );
 }
 
 /** GET /summaries/{jobId} → current status, stage and (when done) the result */

@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createSummary, getErrorMessage, getSummaryJob, uploadDocument } from "@/lib/api/client";
-import type { ProcessingStage, SummaryResult, SummaryStyle } from "@/lib/api/types";
+import { createSummary, getErrorMessage, getSummaryJob, isDailyLimitError, uploadDocument } from "@/lib/api/client";
+import type { DailyQuota, ProcessingStage, SummaryResult, SummaryStyle } from "@/lib/api/types";
+import { formatQuotaReset, utcDay } from "@/lib/quota";
 import { ErrorAlert } from "./error-alert";
 import { FileDropzone, type UploadStatus } from "./file-dropzone";
 import { FollowUpChat } from "./follow-up-chat";
@@ -39,6 +40,11 @@ export function DocumentAiApp() {
   const [jobError, setJobError] = useState("");
   const [result, setResult] = useState<SummaryResult | null>(null);
 
+  // Daily quota — only known after a POST /summaries response or a 429 (there's no GET).
+  const [quota, setQuota] = useState<DailyQuota | null>(null);
+  const [quotaDay, setQuotaDay] = useState(""); // UTC day the quota belongs to
+  const [limitReachedOn, setLimitReachedOn] = useState(""); // UTC day a 429 was received
+
   /** Upload starts as soon as a file is chosen. */
   async function handleFileSelect(selected: File) {
     setFile(selected);
@@ -70,11 +76,23 @@ export function DocumentAiApp() {
     setStage(undefined);
 
     try {
-      const newJobId = await createSummary(documentId, style);
-      setJobId(newJobId);
-      await waitForResult(newJobId);
+      const res = await createSummary(documentId, style);
+      setQuota(res);
+      setQuotaDay(utcDay());
+      setJobId(res.jobId);
+      await waitForResult(res.jobId);
     } catch (error) {
-      setJobError(getErrorMessage(error));
+      if (isDailyLimitError(error)) {
+        setLimitReachedOn(utcDay());
+        if (quota) {
+          setQuota({ ...quota, dailyUsed: quota.dailyLimit, dailyRemaining: 0 });
+          setQuotaDay(utcDay());
+        }
+        const limit = quota ? `${quota.dailyLimit} ` : "";
+        setJobError(`You've used all ${limit}summaries for today. You can create more after ${formatQuotaReset()}.`);
+      } else {
+        setJobError(getErrorMessage(error));
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -112,7 +130,13 @@ export function DocumentAiApp() {
     }
   }
 
-  const canGenerate = uploadStatus === "uploaded" && !isProcessing;
+  // Recomputed every render, so it clears by itself after 00:00 UTC.
+  const today = utcDay();
+  const gotLimitError = limitReachedOn === today;
+  const limitReached = gotLimitError || (quota?.dailyRemaining === 0 && quotaDay === today);
+  const quotaKnown = quota !== null && quotaDay === today;
+
+  const canGenerate = uploadStatus === "uploaded" && !isProcessing && !limitReached;
 
   return (
     <div className="relative isolate flex min-h-dvh flex-col overflow-x-hidden">
@@ -158,17 +182,33 @@ export function DocumentAiApp() {
                   {!file && (
                     <p className="text-center text-xs text-muted-foreground">Upload a document to get started.</p>
                   )}
+                  {limitReached ? (
+                    <p className="text-center text-xs text-muted-foreground">
+                      Daily limit reached. Resets at {formatQuotaReset()}.
+                    </p>
+                  ) : (
+                    quotaKnown && (
+                      <p className="text-center text-xs text-muted-foreground">
+                        {quota.dailyRemaining} of {quota.dailyLimit}{" "}
+                        {quota.dailyRemaining === 1 ? "summary" : "summaries"} left today
+                      </p>
+                    )
+                  )}
                 </>
               )}
 
               {jobError && (
                 <ErrorAlert
-                  title="Couldn't get the summary"
+                  title={gotLimitError ? "Daily limit reached" : "Couldn't get the summary"}
                   message={jobError}
-                  actions={[
-                    { label: "Try again", onClick: handleGenerate },
-                    ...(jobId ? [{ label: "Check again", onClick: handleCheckAgain }] : []),
-                  ]}
+                  actions={
+                    gotLimitError
+                      ? []
+                      : [
+                          { label: "Try again", onClick: handleGenerate },
+                          ...(jobId ? [{ label: "Check again", onClick: handleCheckAgain }] : []),
+                        ]
+                  }
                 />
               )}
             </div>
@@ -190,7 +230,7 @@ export function DocumentAiApp() {
   );
 }
 
-function BackgroundDecor() {
+export function BackgroundDecor() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[720px] overflow-hidden">
       <div className="absolute top-[-14rem] left-1/2 h-[34rem] w-[58rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,oklch(0.82_0.13_295/0.45),transparent)] blur-2xl" />
