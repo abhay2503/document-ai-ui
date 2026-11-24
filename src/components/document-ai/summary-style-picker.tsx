@@ -29,7 +29,7 @@ export function SummaryStylePicker({ value, onChange, disabled }: SummaryStylePi
             <label
               key={option.value}
               className={cn(
-                "relative flex cursor-pointer flex-col gap-2.5 rounded-xl border bg-card p-3.5 shadow-xs transition-all duration-150",
+                "relative flex cursor-pointer flex-col gap-2 rounded-xl border bg-card p-3 shadow-xs transition-all duration-150",
                 "hover:border-primary/40 hover:shadow-sm",
                 "has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
                 "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60",

@@ -143,11 +143,11 @@ export function DocumentAiApp() {
       <BackgroundDecor />
       <SiteHeader />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-20 sm:px-6">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-6 sm:px-6">
         <Hero />
 
-        <section className="rounded-2xl border bg-card/90 p-5 shadow-xl ring-1 shadow-primary/5 ring-white/60 backdrop-blur-sm sm:p-8">
-          <div className="space-y-8">
+        <section className="rounded-2xl border bg-card/90 p-5 shadow-xl ring-1 shadow-primary/5 ring-white/60 backdrop-blur-sm sm:p-6">
+          <div className="space-y-5">
             <div>
               <SectionLabel step={1} title="Upload document" />
               <FileDropzone
@@ -166,7 +166,7 @@ export function DocumentAiApp() {
 
             <SummaryStylePicker value={style} onChange={setStyle} disabled={isProcessing} />
 
-            <div className="space-y-3 border-t pt-6">
+            <div className="space-y-3 border-t pt-5">
               {isProcessing ? (
                 <ProcessingState stage={stage} fileName={file?.name ?? ""} />
               ) : (
@@ -223,7 +223,7 @@ export function DocumentAiApp() {
         )}
       </main>
 
-      <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
+      <footer className="border-t border-border/60 py-3 text-center text-xs text-muted-foreground">
         DocuMind AI · AI-generated summaries can contain mistakes. Check important details.
       </footer>
     </div>

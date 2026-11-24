@@ -15,7 +15,7 @@ export function SectionLabel({ step, title, htmlFor, hint, as = "h2" }: SectionL
       <span className="grid size-5 shrink-0 place-items-center rounded-full bg-accent text-[11px] font-semibold text-accent-foreground tabular-nums">
         {step}
       </span>
-      <span className="text-sm font-semibold tracking-tight">{title}</span>``
+      <span className="text-sm font-semibold tracking-tight">{title}</span>
       {hint && <span className="ml-auto text-xs font-normal text-muted-foreground">{hint}</span>}
     </>
   );

@@ -21,9 +21,9 @@ export function InstructionsField() {
         <Textarea
           id="instructions"
           disabled
-          rows={3}
+          rows={2}
           placeholder="Example: Summarize this document in simple language, highlight important points, and identify key decisions."
-          className="min-h-24 resize-none rounded-xl border-dashed bg-muted/40 px-3.5 py-3 leading-relaxed placeholder:text-muted-foreground/60 disabled:bg-muted/40 disabled:opacity-100"
+          className="min-h-16 resize-none rounded-xl border-dashed bg-muted/40 px-3.5 py-2.5 leading-relaxed placeholder:text-muted-foreground/60 disabled:bg-muted/40 disabled:opacity-100"
         />
         <div className="pointer-events-none absolute inset-0 grid place-items-center rounded-xl bg-gradient-to-b from-transparent via-card/40 to-card/70">
           <p className="flex items-center gap-1.5 rounded-full border bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground shadow-xs backdrop-blur-sm">

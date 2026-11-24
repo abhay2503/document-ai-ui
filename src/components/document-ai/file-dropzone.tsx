@@ -178,7 +178,7 @@ export function FileDropzone({
           {...dragHandlers}
           onClick={openPicker}
           className={cn(
-            "group relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition-all duration-200 sm:py-12",
+            "group relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-5 text-center transition-all duration-200",
             "border-border bg-gradient-to-b from-accent/40 to-transparent hover:border-primary/40 hover:from-accent/70",
             isDragging && "scale-[1.01] border-primary bg-accent/40 from-accent",
             validationError && !isDragging && "border-destructive/40",
@@ -187,12 +187,12 @@ export function FileDropzone({
         >
           <div
             className={cn(
-              "mb-4 grid size-12 place-items-center rounded-2xl bg-card text-primary shadow-sm ring-1 ring-border transition-transform duration-200",
+              "mb-2 grid size-10 place-items-center rounded-2xl bg-card text-primary shadow-sm ring-1 ring-border transition-transform duration-200",
               "group-hover:-translate-y-0.5",
               isDragging && "-translate-y-1 scale-110",
             )}
           >
-            <CloudUpload className="size-6" aria-hidden />
+            <CloudUpload className="size-5" aria-hidden />
           </div>
           <p className="text-sm font-medium">
             {isDragging ? "Drop to upload" : "Drag and drop your document here"}
@@ -203,7 +203,7 @@ export function FileDropzone({
           <Button
             variant="outline"
             size="lg"
-            className="mt-5 bg-card px-4 shadow-xs"
+            className="mt-3 bg-card px-4 shadow-xs"
             onClick={(e) => {
               e.stopPropagation();
               openPicker();
